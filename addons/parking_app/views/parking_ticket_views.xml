@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_parking_ticket_tree" model="ir.ui.view">
+        <field name="name">parking.ticket.list</field>
+        <field name="model">parking.ticket</field>
+        <field name="arch" type="xml">
+            <list string="Tickets de Parking">
+                <field name="x_plate_number"/>
+                <field name="x_start_time"/>
+                <field name="x_end_time"/>
+                <field name="x_state"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_parking_ticket_form" model="ir.ui.view">
+        <field name="name">parking.ticket.form</field>
+        <field name="model">parking.ticket</field>
+        <field name="arch" type="xml">
+            <form string="Ticket de Parking">
+                <sheet>
+                    <group>
+                        <field name="x_plate_number"/>
+                        <field name="x_start_time"/>
+                        <field name="x_end_time"/>
+                        <field name="x_state"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_parking_ticket" model="ir.actions.act_window">
+        <field name="name">Tickets de Parking</field>
+        <field name="res_model">parking.ticket</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_parking_root"
+        name="Parking"
+        sequence="10"/>
+    
+    <menuitem
+        id="menu_parking_ticket"
+        name="Tickets"
+        parent="menu_parking_root"
+        action="action_parking_ticket"
+        sequence="10"/>
+
+</odoo>

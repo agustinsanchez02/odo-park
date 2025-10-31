@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Parking - Puesto de Salida</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        /* Estilos para que se vea grande y centrado */
+        body, html {
+            height: 100%; margin: 0; background: #333; color: white;
+            font-family: Arial, sans-serif;
+            display: flex; justify-content: center; align-items: center;
+        }
+        #kiosk-display {
+            background: #111; border-radius: 20px; padding: 40px;
+            text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #qr-code {
+            width: 400px; height: 400px; margin: 20px auto 0 auto;
+            background: white; padding: 20px; border-radius: 10px;
+        }
+        #qr-code img { display: block; width: 100% !important; height: 100% !important; }
+        h1 { font-size: 3em; margin: 0 0 10px 0; }
+        #patente { font-size: 2.5em; color: #ffdd00; }
+        #mensaje { font-size: 1.5em; }
+    </style>
+</head>
+<body>
+
+    <div id="kiosk-display">
+        <h1>Salida de Parking</h1>
+        <div id="patente">---</div>
+        <div id="mensaje">Escanee el QR para pagar</div>
+        
+        <div id="qr-code">
+             <h2>Esperando vehículo...</h2>
+        </div>
+    </div>
+
+    <script>
+        // 2. Conectamos la Pantalla al Cerebro (main.py) por WebSocket
+        
+        // Obtenemos los elementos de la pantalla
+        const qrElement = document.getElementById('qr-code');
+        const patenteElement = document.getElementById('patente');
+        const mensajeElement = document.getElementById('mensaje');
+        var qrCode = null; // Variable para guardar el objeto QR
+
+        function conectarWebSocket() {
+            // ¡VERSIÓN CORREGIDA con tu IP!
+            var ws = new WebSocket("ws://192.168.1.32:8000/ws");
+
+            ws.onopen = function(event) {
+                console.log("Conectado al Cerebro (main.py).");
+                mensajeElement.textContent = "Escanee el QR para pagar";
+            };
+
+            // 3. ¡LA MAGIA! Esto se ejecuta cuando el Cerebro envía un mensaje
+            ws.onmessage = function(event) {
+                console.log("Mensaje recibido:", event.data);
+                
+                // Limpiamos el QR anterior
+                if(qrCode) {
+                    qrCode.clear();
+                }
+                qrElement.innerHTML = ''; // Limpia el "Esperando..."
+                
+                // Parseamos los datos que envía el Cerebro
+                var data = JSON.parse(event.data);
+                
+                patenteElement.textContent = data.patente;
+                mensajeElement.textContent = "Escanee el QR para pagar";
+                
+                // 4. Generamos el nuevo QR en la pantalla
+                qrCode = new QRCode(qrElement, {
+                    text: data.url, // La URL de pago de Odoo/MercadoPago
+                    width: 400,
+                    height: 400,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            };
+
+            ws.onclose = function(event) {
+                console.log("Desconectado. Intentando reconectar en 3 segundos...");
+                patenteElement.textContent = "---";
+                mensajeElement.textContent = "RECONECTANDO...";
+                qrElement.innerHTML = '<h2>Reconectando...</h2>';
+                setTimeout(conectarWebSocket, 3000); // Intenta reconectar
+            };
+        }
+
+        // Inicia la conexión
+        conectarWebSocket();
+    </script>
+
+</body>
+</html>

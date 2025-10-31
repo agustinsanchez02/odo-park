@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_parking_ticket_user,access.parking.ticket.user,model_parking_ticket,base.group_user,1,1,1,1
